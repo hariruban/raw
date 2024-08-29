@@ -95,9 +95,9 @@ class NmapTool:
 
     def restart_prompt(self):
         response = input("\nDo you want to perform another scan? (yes/no): ").strip().lower()
-        if response == "yes":
+        if response == "y":
             self.run()
-        elif response == "no":
+        elif response == "n":
             exit(0)
         else:
             print("[!] Invalid response. Exiting.")
