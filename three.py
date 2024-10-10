@@ -234,35 +234,100 @@ class TracerouteTool:
     def clear_screen(self):
         os.system('cls' if os.name == 'nt' else 'clear')
 
-def main_menu():
-    while True:
+class NiktoTool:
+    def __init__(self):
+        self.niktoPrompt = "Enter target URL for Nikto scan (e.g., http://example.com, or type 'exit' to quit): "
+        self.niktoLogo = """
+        ====================================
+        |          Nikto Tool              |
+        ====================================
+        """
+        if not self.installed():
+            print("[!] Nikto is not installed.")
+            exit(1)
+        self.run()
+
+    def installed(self):
+        return os.path.isfile("/usr/bin/nikto.pl") or os.path.isfile("/usr/local/bin/nikto.pl")
+
+    def run(self):
+        while True:
+            self.clear_screen()
+            print(self.niktoLogo)
+            target = input(self.niktoPrompt).strip()
+            if target.lower() == 'exit':
+                print("[*] Exiting Nikto Tool...")
+                break
+            if not self.is_valid_url(target):
+                print("[!] Invalid URL. Please try again.")
+                input("Press Enter to continue...")
+                continue
+            self.scan(target)
+            choice = input("\nDo you want to perform another Nikto scan? (yes/no): ").strip().lower()
+            if choice != 'yes':
+                print("[*] Exiting Nikto Tool...")
+                break
+
+    def is_valid_url(self, url):
+        url_regex = re.compile(
+            r'^(http://|https://)?(www\.)?[a-zA-Z0-9-]+\.[a-zA-Z]{2,6}(/[a-zA-Z0-9-./?%&=]*)?$'
+        )
+        return url_regex.match(url)
+
+    def scan(self, target):
+        self.clear_screen()
+        print(f"Performing Nikto scan for: {target}\n")
+        try:
+            result = subprocess.run(["perl", "/usr/bin/nikto.pl", "-h", target], capture_output=True, text=True, check=True)
+            print(result.stdout)
+        except subprocess.CalledProcessError as e:
+            print(f"[!] Error performing Nikto scan: {e}")
+
+    def clear_screen(self):
         os.system('cls' if os.name == 'nt' else 'clear')
-        print("""
+
+
+class InfoGatheringTool:
+    def __init__(self):
+        self.logo = """
         ====================================
-        |        Information Gathering     |
+        |      Information Gathering Tool   |
         ====================================
-        | 1 - Whois Lookup Tool            |
-        | 2 - Dig Lookup Tool              |
-        | 3 - Nmap Tool                    |
-        | 4 - Traceroute Tool              |
-        | 99 - Exit                        |
-        ====================================
-        """)
-        choice = input("Choose a tool: ")
-        if choice == "1":
-            whois_tool = WhoisTool()
-        elif choice == "2":
-            dig_tool = DigTool()
-        elif choice == "3":
-            nmap_tool = NmapTool()
-        elif choice == "4":
-            traceroute_tool = TracerouteTool()
-        elif choice == "99":
-            print("[*] Exiting the tool...")
-            break
-        else:
-            print("Invalid choice. Please select a valid option.")
-            input("Press Enter to continue...")
+        """
+        self.run()
+
+    def run(self):
+        while True:
+            self.clear_screen()
+            print(self.logo)
+            print("Select an option:")
+            print("1. Whois Lookup")
+            print("2. DNS Lookup (Dig)")
+            print("3. Nmap Scan")
+            print("4. Traceroute")
+            print("5. Nikto Scan")
+            print("6. Exit")
+            choice = input("Enter your choice: ").strip()
+            if choice == '1':
+                WhoisTool()
+            elif choice == '2':
+                DigTool()
+            elif choice == '3':
+                NmapTool()
+            elif choice == '4':
+                TracerouteTool()
+            elif choice == '5':
+                NiktoTool()
+            elif choice == '6':
+                print("[*] Exiting Information Gathering Tool...")
+                break
+            else:
+                print("[!] Invalid choice. Please try again.")
+                input("Press Enter to continue...")
+
+    def clear_screen(self):
+        os.system('cls' if os.name == 'nt' else 'clear')
+
 
 if __name__ == "__main__":
-    main_menu()
+    InfoGatheringTool()
